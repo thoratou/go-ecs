@@ -25,7 +25,11 @@ type world struct {
 }
 
 func NewWorld() World {
-	return &world{entityCounter: 0}
+	return &world{
+		entityCounter: 0,
+		entities:      make(map[EntityId]Entity),
+		systems:       make([]System, 0),
+	}
 }
 
 func (w *world) AddSystem(s System) {
@@ -43,7 +47,11 @@ func (w *world) RemoveSystem(s System) {
 
 func (w *world) NewEntity() Entity {
 	w.entityCounter++
-	return &entity{id: w.entityCounter, world: w}
+	return &entity{
+		components: make(map[ComponentIndex]Component),
+		id:         w.entityCounter,
+		world:      w,
+	}
 }
 
 func (w *world) AddEntity(e Entity) error {

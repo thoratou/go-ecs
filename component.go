@@ -4,11 +4,7 @@ import (
 	"reflect"
 )
 
-type Component interface {
-	//index for component type
-	//only one index value per component type should be provided, even for different instances
-	GetIndex() ComponentIndex
-}
+type Component interface{}
 
 //index for component type
 //used to avoid performance issues due to reflect computing
@@ -19,10 +15,16 @@ type componentManager struct {
 	counter ComponentIndex
 }
 
-var componentManagerInst componentManager = componentManager{counter: 0}
+var componentManagerInst *componentManager = nil
 
 func getComponentManager() *componentManager {
-	return &componentManagerInst
+	if componentManagerInst == nil {
+		componentManagerInst = &componentManager{
+			indexes: make(map[reflect.Type]ComponentIndex),
+			counter: 0,
+		}
+	}
+	return componentManagerInst
 }
 
 func (m *componentManager) getIndex(c Component) ComponentIndex {

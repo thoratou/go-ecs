@@ -7,6 +7,7 @@ import (
 type Entity interface {
 	//global entity id (should be unique in all the world)
 	GetId() EntityId
+	SetId(i EntityId)
 
 	//world containing this entity
 	GetWorld() World
@@ -21,8 +22,6 @@ type Entity interface {
 	RemoveComponentFromType(t reflect.Type) bool
 }
 
-type EntityId uint32
-
 type entity struct {
 	components map[ComponentIndex]Component
 	id         EntityId
@@ -31,6 +30,10 @@ type entity struct {
 
 func (e *entity) GetId() EntityId {
 	return e.id
+}
+
+func (e *entity) SetId(i EntityId) {
+	e.id = i
 }
 
 func (e *entity) GetWorld() World {

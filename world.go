@@ -20,6 +20,7 @@ type Delay float32
 
 type world struct {
 	entityCounter EntityId
+	releasedIds   entityIdStack
 	entities      map[EntityId]Entity
 	systems       []System
 }
@@ -46,20 +47,24 @@ func (w *world) RemoveSystem(s System) {
 }
 
 func (w *world) NewEntity() Entity {
-	w.entityCounter++
 	return &entity{
 		components: make(map[ComponentIndex]Component),
-		id:         w.entityCounter,
+		id:         UnknownId,
 		world:      w,
 	}
 }
 
 func (w *world) AddEntity(e Entity) error {
-	id := e.GetId()
-	if _, exists := w.entities[id]; exists {
-		return NewError("entity with id ", id, " already added to world")
+	oldId := e.GetId()
+
+	if oldId != UnknownId {
+		return NewError("entity with id ", oldId, " already added to world")
 	}
-	w.entities[id] = e
+
+	newId := w.allocateNewEntityId()
+	e.SetId(newId)
+
+	w.entities[newId] = e
 	w.updateSystemsWithEntity(e)
 	return nil
 }
@@ -80,9 +85,11 @@ func (w *world) RemoveEntity(e Entity) bool {
 
 	if exists {
 		w.removeEntityFromSystems(e)
+		delete(w.entities, id)
+		w.releaseEntityId(id)
+		e.SetId(UnknownId)
 	}
 
-	delete(w.entities, id)
 	return exists
 }
 
@@ -107,4 +114,19 @@ func (w *world) removeEntityFromSystems(e Entity) {
 	for _, s := range w.systems {
 		s.Unregister(e)
 	}
+}
+
+func (w *world) allocateNewEntityId() EntityId {
+	if w.releasedIds.Empty() {
+		id := w.entityCounter
+		w.entityCounter++
+		return id
+	} else {
+		id := w.releasedIds.Pop()
+		return id
+	}
+}
+
+func (w *world) releaseEntityId(id EntityId) {
+	w.releasedIds.Put(id)
 }

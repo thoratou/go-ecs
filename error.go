@@ -5,14 +5,14 @@ import (
 )
 
 type ecsError struct {
-	reason string
+	reason *string
 }
 
-func NewError(args ...interface{}) *error {
+func NewError(args ...interface{}) error {
 	value := fmt.Sprint("", args)
-	return &ecsError{value}
+	return ecsError{&value}
 }
 
 func (e ecsError) Error() string {
-	return e.reason
+	return *e.reason
 }

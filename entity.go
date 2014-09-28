@@ -45,6 +45,7 @@ func (e *entity) AddComponent(c Component) error {
 	if _, exists := e.components[i]; exists {
 		return NewError("component with type ", reflect.TypeOf(c), "already registered to entity ", i)
 	}
+	e.components[i] = c
 	return nil
 }
 

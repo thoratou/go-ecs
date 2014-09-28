@@ -37,7 +37,7 @@ func (m *componentManager) getIndexFromType(t reflect.Type) ComponentIndex {
 	} else {
 		index := m.counter
 		m.counter++
-		m.indexes[t] = m.counter
+		m.indexes[t] = index
 		return index
 	}
 }

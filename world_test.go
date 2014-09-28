@@ -83,7 +83,7 @@ func TestBasic(t *testing.T) {
 		t.Fatal("result should be empty due to no Update() call")
 	}
 
-	system.Update(0.0)
+	world.Update(0.0)
 
 	if len(system.entities) != 1 {
 		t.Fatal("system should content one entity")
@@ -103,5 +103,54 @@ func TestBasic(t *testing.T) {
 	}
 	if result != "|" {
 		t.Fatal("result gap, expected: |, received: ", result)
+	}
+}
+
+func TestAddComponents(t *testing.T) {
+	t.Log("voidIndex:", voidIndex)
+	t.Log("positionIndex:", positionIndex)
+
+	world := NewWorld()
+
+	system := ComponentIndexSystem{
+		world:    world,
+		entities: make(map[EntityId]Entity),
+		result:   make(map[EntityId]string),
+	}
+
+	world.AddSystem(&system)
+
+	voidAndPosition := world.NewEntity()
+
+	if err := voidAndPosition.AddComponent(VoidComponent{}); err != nil {
+		t.Fatal("unexpected error at component addition: ", err)
+	}
+
+	if err := voidAndPosition.AddComponent(PositionComponent{1, 2}); err != nil {
+		t.Fatal("unexpected error at component addition: ", err)
+	}
+
+	world.AddEntity(voidAndPosition)
+
+	world.Update(0.0)
+
+	if len(system.entities) != 1 {
+		t.Fatal("system should content one entity")
+	}
+
+	if _, exists := system.entities[voidAndPosition.GetId()]; !exists {
+		t.Fatal("system should content an entity with id: ", voidAndPosition.GetId())
+	}
+
+	if len(system.result) != 1 {
+		t.Fatal("result should contain one result after Update() call")
+	}
+
+	result, exists := system.result[voidAndPosition.GetId()]
+	if !exists {
+		t.Fatal("wrong id in result map")
+	}
+	if result != "|position|void|" {
+		t.Fatal("result gap, expected: |position|void|, received: ", result)
 	}
 }

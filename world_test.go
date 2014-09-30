@@ -108,9 +108,6 @@ func TestBasic(t *testing.T) {
 }
 
 func TestAddComponents(t *testing.T) {
-	t.Log("voidIndex:", voidIndex)
-	t.Log("positionIndex:", positionIndex)
-
 	world := NewWorld()
 
 	system := ComponentIndexSystem{
